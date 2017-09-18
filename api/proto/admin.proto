@@ -1,0 +1,37 @@
+
+
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "common.proto";
+
+package grpcapi;
+option java_package = "com.gf.va.api.grpcapi"; 
+
+// 基金交易的管理员
+service OpenFundAdmin {
+    // 红冲蓝补基金持仓
+    // 可用于初始化资产单元的基金持仓
+    rpc SupplyOpenFundStock (SupplyOpenFundStockReq) returns (SupplyOpenFundStockResp) {
+        option (google.api.http) = {
+            put: "/admin/project/ofstock"
+            body: "*"
+        };
+    }
+}
+
+// 冲补基金持仓大小的消息
+message SupplyOpenFundStockReq {
+    BaseReq baseReq = 1; // 基础请求头
+    int64 clientId = 2; // 客户ID
+    int64 projectId = 3; // 资产单元ID
+    string stockCode = 4; // 基金代码
+    double amount = 5; // 红冲蓝补的基金持仓数量
+}
+
+// 冲补基金持仓大小的消息响应
+message SupplyOpenFundStockResp {
+    RespStatus respStatus = 1;  //结果状态
+}
+
+

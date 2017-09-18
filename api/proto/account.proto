@@ -1,0 +1,198 @@
+
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "common.proto";
+import "fund_real.proto";
+
+package grpcapi;
+option java_package = "com.gf.va.api.grpcapi"; 
+
+// 账号管理
+service AccountManager {
+    // 创建资产单元 
+    rpc OpenProject (OpenProjectReq) returns (OpenProjectResp) {
+        option (google.api.http) = {
+            post: "/project/open"
+            body: "*"
+        };
+    }
+    // 创建资产单元（增强接口）： 自动注册客户、添加默认资金账户，最后创建资产单元
+    rpc AutoOpenProject (AutoOpenProjectReq) returns (AutoOpenProjectResp){
+        option (google.api.http) = {
+            post: "/project/open/auto"
+            body: "*"
+        };
+    }
+    // 注销资产单元
+    rpc CloseProject (CloseProjectReq) returns (CloseProjectResp) {
+        option (google.api.http) = {
+            put: "/project/close"
+            body: "*"
+        };
+    }
+    // 根据clientId, 查询客户的资产单元列表
+    rpc ListProjectByClientId (QueryProjectReq) returns (ListProjectResp) {
+        option (google.api.http) = {
+            get: "/project/list"
+        };
+    }
+
+    // 根据Id, 查询客户的资产单元
+    rpc GetProjectById (QueryProjectReq) returns (GetProjectResp) {
+        option (google.api.http) = {
+            get: "/project"
+        };
+    }
+
+    // 检查资产单元的数据状态（资金、持仓与柜台的资金、持仓进行对比）
+    rpc CheckProjectDataStatus (QueryProjectReq) returns (CheckProjectResp) {
+        option (google.api.http) = {
+            get: "/project/checkdata"
+        };
+    }
+    // 查询客户的历史收益率
+    rpc ListProjectYieldRate (QueryProjectYieldRateReq) returns (ListProjectYieldRateResp) {
+        option (google.api.http) = {
+            get: "/project/yield/list"
+        };
+    }    
+}
+
+// 创建资产单元的消息
+message OpenProjectReq {
+    BaseReq baseReq = 1; // 基础请求头
+    int64 clientId = 2; // 客户ID
+    int64 fundAccountId = 3; // 资金账号ID
+    string name = 4; // 自定义名称
+    int32 defaultFlag = 5; // 是否默认(暂忽略)
+    string remark = 6; // 备注
+}
+// 创建资产单元的返回消息
+message OpenProjectResp {
+    RespStatus respStatus = 1; // 响应状态
+    int64 projectId = 2; // 新资产单元ID
+}
+
+// 创建资产单元的增强的消息
+message AutoOpenProjectReq {
+    BaseReq baseReq = 1; // 基础请求头
+    string realClientType = 2; // 实体账号类型, 必选, trade 交易账号
+    string realClientId = 3; // 实体账号ID, 必选
+    string clientName = 4; // 客户姓名, 必选
+    string certType = 5; // 证件类型, 必选, 0 身份证
+    string certId = 6; // 证件ID
+    string realFundAccount = 7; // 实际资金账号ID, 可选, 默认取普通资产账号
+    string moneyType = 8; // 货币类型, 可选, 默认CNY
+    string name = 9; // 资产单元自定义名称
+    string remark = 10; // 资产单元备注
+}
+
+// 创建资产单元的增强的返回消息
+message AutoOpenProjectResp {
+    RespStatus respStatus = 1; // 结果状态
+    int64 clientId = 2; // 客户ID
+    int64 fundAccountId = 3; // 资金账号ID
+    int64 projectId = 4; // 资产单元ID
+}
+
+// 注销资产单元的消息
+message CloseProjectReq {
+    BaseReq baseReq = 1; // 基础请求头
+    int64 clientId = 2; // 客户ID，必选
+    int64 projectId = 3; // 资产单元ID，必选
+}
+
+// 注销资产单元的响应消息
+message CloseProjectResp {
+    RespStatus respStatus = 1; // 结构状态
+    int64 clientId = 2; // 客户ID
+    int64 projectId = 3; //资产单元ID
+}
+
+// 查询资产单元的消息
+message QueryProjectReq {
+    BaseReq baseReq = 1; // 基础请求头
+    PageInfo pageInfo = 2; // 分页信息
+    int64 clientId = 3; // 客户ID
+    int64 projectId = 4; //资产单元ID
+}
+
+// 资产单元 对象
+message Project {
+    int64 id = 1; // 资产单元ID
+    int64 clientId = 2; // 客户ID
+    int64 fundAccountId = 3; // 资金账号ID
+    string name = 4; // 资产单元名称
+    int32 defaultFlag = 5;
+    string assetType = 6; // 资产类型
+    int32 status = 7; // 状态
+    string remark = 8; // 备注
+    int64 createAt = 9; // 创建时间
+    int64 changeAt = 10; // 状态更改时间
+    double yield = 11; // 最新收益
+    double yieldRate = 12; // 最新收益率
+    double holdYield = 13; // 持有收益; 当前持仓的收益
+    double holdYieldRate = 14; // 持有收益率
+    double cuYield = 15; // 累计收益; 历史所有持仓的收益
+    double cuYieldRate = 16; // 累计收益率
+    double enableMarketValue = 17; // 可用持仓市值
+    double frozenMarketValue = 18; // 冻结持仓市值
+    FundReal fundReal = 19; // 资金
+}
+//查询客户的资产单元列表的返回消息
+message ListProjectResp {
+    RespStatus respStatus = 1; // 结果状态
+    PageInfo page = 2; // 页码
+    repeated Project data = 3; // 资产单元列表
+}
+
+//查询客户的资产单元的返回消息
+message GetProjectResp {
+    RespStatus respStatus = 1; // 结果状态
+    Project data = 2; // 返回结果
+}
+
+// 检查资产单元数据状态的返回消息
+message CheckProjectResp {
+    RespStatus respStatus = 1; // 结果状态
+    bool fundRealStatus = 2; // 资金数据状态
+    bool stockStatus = 3; // 持仓数据状态
+}
+
+// 查询资产单元的消息
+message QueryProjectYieldRateReq {
+    BaseReq baseReq = 1; // 基础请求头
+    int64 clientId = 2; // 客户ID
+    int64 projectId = 3; //资产单元ID
+    int64 beginDate = 4; // 查询开始日期
+    int64 endDate = 5; // 查询结束日期
+}
+// 资产单元资产概要 对象
+message StatProjectAsset {
+    int64 projectId = 1; // 资产单元ID
+    int64 clientId = 2; // 客户ID
+    int64 initDate = 3; // 初始化日期
+    double enableBalance = 4; // 可用资金
+    double frozenBalance = 5; // 冻结资金
+    double correctBalance = 6; // 资产修正金额
+    double debitBalance = 7; // 借入资金
+    double yield = 8; // 最新收益
+    double yieldRate = 9; // 最新收益率
+    double holdYield = 10; // 持有收益; 当前持仓的收益
+    double holdYieldRate = 11; // 持有收益率
+    double cuYield = 12; // 累计收益; 历史所有持仓的收益
+    double cuYieldRate = 13; // 累计收益率
+    double enableMarketValue = 14; // 可用持仓市值
+    double frozenMarketValue = 15; // 冻结持仓市值
+    string remark = 16; // 备注
+    int64 createAt = 17; // 创建时间
+    int64 updateAt = 18; // 状态更改时间
+}
+//查询客户的历史收益率的返回消息
+message ListProjectYieldRateResp {
+    RespStatus respStatus = 1; // 结果状态
+    repeated StatProjectAsset data = 2; // 资产单元资产概要列表
+}
+
+

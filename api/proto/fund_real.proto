@@ -1,0 +1,151 @@
+
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "common.proto";
+
+package grpcapi;
+option java_package = "com.gf.va.api.grpcapi"; 
+
+// 资金管理
+service FundRealManager {
+    // 资产单元划入资金
+    rpc TransferIn (TransferReq) returns (TransferResp) {
+        option (google.api.http) = {
+            post: "/fund/transfer/in"
+            body: "*"
+        };
+    }
+    
+    // 资产单元划出资金
+    rpc TransferOut (TransferReq) returns (TransferResp) {
+        option (google.api.http) = {
+            post: "/fund/transfer/out"
+            body: "*"
+        };
+    }
+
+    // 资产单元借入资金
+    rpc Debit (TransferReq) returns (TransferResp) {
+        option (google.api.http) = {
+            post: "/fund/debit"
+            body: "*"
+        };
+    }
+
+    // 查询可用资金的分配情况
+    rpc GetAssigning (QueryAssigningReq) returns (GetAssigningResp) {
+        option (google.api.http) = {
+            get: "/fund/assigning"
+        };
+    }
+    // 查询可用资金的分配情况
+    rpc GetAssigningByRealClient (QueryAssigningReq) returns (GetAssigningResp) {
+        option (google.api.http) = {
+            get: "/fund/assigning/byrealclient"
+        };
+    }
+
+    // 查询资产单元的当前资金明细
+    rpc GetFundReal(QueryFundRealReq) returns (GetFundRealResp) {
+        option (google.api.http) = {
+            get: "/fund/fundreal"
+        };
+    }
+
+    // 查询资产单元的资产变动流水
+    rpc ListFundJour (QueryFundJourReq) returns (ListFundJourResp) {
+        option (google.api.http) = {
+            get: "/fund/jour/list"
+        };
+    }
+}
+
+// 划转资金的消息
+message TransferReq {
+    BaseReq baseReq = 1; // 基础请求头
+    int64 clientId = 2; // 客户ID
+    int64 projectId = 3; // 资产单元ID
+    double balance = 4; // 资金数量
+}
+
+// 划转资金的响应
+message TransferResp {
+    RespStatus respStatus = 1; // 结果状态
+}
+
+// 查询可用资金分配情况的消息
+message QueryAssigningReq {
+    BaseReq baseReq = 1; // 基础请求头
+    int64 clientId = 2; // 客户ID
+    int64 projectId = 3; // 资产单元ID
+    string realFundAccount = 4; // 实际资金账号ID, 可选
+    string realClientType = 5; // 实体账号类型, 如：trade
+    string realClientId = 6 ; // 实体账号ID 
+}
+
+// 查询可用资金分配情况的响应
+message GetAssigningResp {
+    RespStatus respStatus = 1; // 结果状态
+    double assignedBalance = 2; // 已分配的可用资金额度
+    double unAssignedBalance = 3; // 未分配的可用资金额度
+}
+
+// 查询资产单元的当前资金明细的消息
+message QueryFundRealReq {
+    BaseReq baseReq = 1; // 基础请求头
+    int64 clientId = 2; // 客户ID
+    int64 projectId = 3; // 资产单元ID
+}
+
+// 资产单元资金
+message FundReal {
+    int64 projectId = 1; // 资产单元ID
+    int64 clientId = 2; // 客户ID
+    int64 fundAccountId = 3; // 资金账号
+    int64 initDate = 4; // 交易日期
+    string assetType = 5; // 资金类型, 0 普通, 1 信用, 2 衍生品, 3 理财/钱袋子
+    string moneyType = 6; // 币种类型, 0 人民币, 1 美元, 2 港元
+    double currentBalance = 7; // 当前资金
+    double enableBalance = 8; // 可用资金
+    double frozenBalance = 9; // 冻结资金
+    double buyBalance = 10; // 委托买入金额
+    double realBuyBalance = 11; // 回报买入金额
+    double realSellBalance = 12; // 回报卖出金额
+    double correctBalance = 13; // 资产修正金额
+    double debitBalance = 14; // 借入金额
+    string remark = 15; // 描述说明
+    int64 updateAt = 17; // 状态变更时间
+}
+
+// 查询资金的响应消息
+message GetFundRealResp {
+    RespStatus respStatus = 1; // 结果状态
+    FundReal data = 2; // 返回结果
+}
+
+//查询资产单元的当前持仓
+message QueryFundJourReq {
+    BaseReq baseReq = 1; // 基础请求头
+    PageInfo pageInfo = 2; // 页码
+    int64 clientId = 3; // 客户ID
+    int64 projectId = 4; // 资产单元ID
+    string businessFlag = 5; //业务类型
+}
+// 资产变动的消息体
+message FundJour {
+    int64 projectId = 1; // 资产单元ID
+    int64 clientId = 2; // 客户ID
+    int64 fundAccountId = 3; // 资金帐户ID
+    int64 initDate = 4; // 交易日期
+    string financeType = 5; // 金融品种: 0 资金, 1 股票, 3 开基
+    string businessFlag = 6; // 业务标志
+    double occurEnableBalance = 7; // 可用资金的发生金额
+}
+// 基金持仓列表的响应消息
+message ListFundJourResp {
+    RespStatus respStatus = 1; // 结果状态
+    PageInfo page = 2; // 页码
+    repeated FundJour data = 3; // 资产变动列表结果
+}
+

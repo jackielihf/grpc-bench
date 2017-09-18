@@ -1,0 +1,41 @@
+
+syntax = "proto3";
+
+package grpcapi;
+option java_package = "com.gf.va.api.grpcapi";
+
+// 基本请求信息
+message BaseReq {
+    string ver = 1; // 版本
+    string uuid = 2; // 消息uuid, required
+    string src = 3; // 来源系统, required
+    string token = 4; // 用户口令
+    string station = 5; // 节点信息: IP/MAC/Disk, required
+    string operatorType = 6; // 操作人类型
+    string operator = 7; // 操作人
+    string entrustWay = 8; // 委托方式
+}
+
+// 响应状态
+message RespStatus {
+    int32 code = 1; // 错误代码
+    string msg = 2; // 消息提示
+}
+
+// 分页
+message PageInfo {
+    int64 total = 1; // 总数
+    int64 page = 2; // 第几页
+    int64 limit = 3; // 页大小
+    string sort = 4; // 排序字段
+    string asc = 5; // 是否是ASC排序
+}
+
+
+// 交易请求头信息
+message TradeHeader {
+    string passwordType = 1; // 密码类别
+    string password = 2; // 密码
+    string opBranchNo = 3; // 操作人所在机构
+    string branchNo = 4; // 客户所在机构
+}

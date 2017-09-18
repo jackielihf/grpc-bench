@@ -1,0 +1,189 @@
+
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "common.proto";
+
+package grpcapi;
+option java_package = "com.gf.va.api.grpcapi";
+
+// 客户管理
+service ClientManager {
+    // 注册客户
+    rpc RegisterClient (RegisterClientReq) returns (RegisterClientResp) {
+        option (google.api.http) = {
+            post: "/client/register"
+            body: "*"
+        };
+    }
+    // 注销客户
+    rpc CloseClient (CloseClientReq) returns (CloseClientResp) {
+        option (google.api.http) = {
+            put: "/client/close"
+            body: "*"
+        };
+    }
+    // 冻结客户
+    rpc FrozenClient (FrozenClientReq) returns (FrozenClientResp) {
+        option (google.api.http) = {
+            put: "/client/frozen"
+            body: "*"
+        };
+    }
+    // 根据真实客户ID，查询客户
+    rpc GetClientByRealClient (QueryClientReq) returns (GetClientResp) {
+        option (google.api.http) = {
+            get: "/client/byrealclient"
+        };
+    }
+    // 根据证件，查询客户
+    rpc GetClientByCert (QueryClientReq) returns (GetClientResp) {
+        option (google.api.http) = {
+            get: "/client/bycert"
+        };
+    }
+    // 添加资金账号
+    rpc AddFundAccount (AddFundAccountReq) returns (AddFundAccountResp) {
+        option (google.api.http) = {
+            post: "/client/fundaccount/add"
+            body: "*"
+        };   
+    }
+    // 根据客户ID，查询资金账号
+    rpc ListFundAccountByRealClient (QueryFundAccountReq) returns (ListFundAccountResp) {
+        option (google.api.http) = {
+            get: "/client/fundaccount/list"
+        };
+    }
+}
+
+// 注册客户消息
+message RegisterClientReq {
+    BaseReq baseReq = 1; // 基础请求头
+    string realClientType = 2; // 实体账号类型, 如：trade
+    string realClientId = 3; // 实体账号ID 
+    string clientName = 4; // 客户姓名
+    string certType = 5; // 证件类型, 0 身份证
+    string certId = 6; // 证件ID
+    string remark = 7; // 备注
+}
+
+// 注册客户的返回消息
+message RegisterClientResp {
+    RespStatus respStatus = 1; // 结果状态
+    int64 clientId = 2; // 注册后生成的客户ID
+}
+
+// 注销客户的消息
+message CloseClientReq {
+    BaseReq baseReq = 1;// 基础请求头
+    int64 clientId = 2; //客户ID
+}
+
+// 注销客户的返回消息
+message CloseClientResp {
+    RespStatus respStatus = 1; // 结果状态
+    int64 clientId = 2; //客户ID
+}
+
+// 冻结客户的消息
+message FrozenClientReq {
+    BaseReq baseReq = 1;// 基础请求头
+    int64 clientId = 2;//客户ID
+}
+
+// 冻结客户的返回消息
+message FrozenClientResp {
+    RespStatus respStatus = 1;//结果状态
+    int64 clientId = 2;//客户ID
+}
+
+// 查询客户的消息
+message QueryClientReq {
+    BaseReq baseReq = 1; // 基础请求头
+    int64 clientId = 2; // 客户ID
+    string realClientType = 3; // 实体账户类型
+    string realClientId = 4; // 实体账户ID
+    string certType = 5; // 证件类型, 0 身份证
+    string certId = 6; // 证件ID
+}
+//客户 实体
+message Client {
+    int64 id = 1; // 客户ID 
+    string clientName = 2; // 客户姓名
+    string fullName = 3; // 客户全称
+    string certType = 4; // 证件类型
+    string certId = 5; // 证件ID
+    int32 status = 6; // 客户状态
+    string remark = 7; // 备注
+    string brokerId = 8; // 所属经纪商
+    string brokerOrg = 9; // 所属经纪商的分支机构
+    string realClientType = 10; // 实体账户类型
+    string realClientId = 11; // 实体账户ID
+    int64 createAt = 12; // 创建时间
+    int64 changeAt = 13; // 状态变更时间
+}
+
+message GetClientResp {
+    RespStatus respStatus = 1; // 结果状态
+    Client data = 2; // 客户对象
+}
+
+// 添加资金账号的请求消息
+message AddFundAccountReq {
+    BaseReq baseReq = 1; // 基础请求头
+    string name = 2; //资金帐号名称
+    string remark = 3; //备注
+    string realFundAccount = 4; //客户的真实的资金帐户ID
+    string realClientType = 5; //实体帐户类型
+    string realClientId = 6; //实体帐户ID
+    string moneyType = 7; //资金类型
+}
+
+// 添加资金账号的响应消息
+message AddFundAccountResp {
+    RespStatus respStatus = 1;// 结果状态
+    int64 fundAccountId = 2; // 生成的资金账号ID
+}
+
+// 查询资金账号的消息
+message QueryFundAccountReq {
+    BaseReq baseReq = 1; // 基础请求头
+    PageInfo pageInfo = 2; // 分页信息
+    int64 clientId = 3; // 客户ID
+    string realClientType = 4; // 实体账号类型, trade 交易账号
+    string realClientId = 5; // 实体账号ID
+    int64 projectId = 6; // 资产单元ID, 可选
+
+}
+
+// 资金账号
+message FundAccount {
+    int64 id = 1; // 资金账号ID 
+    string name = 2; // 资金账号自定义名称
+    string assetType = 3; // 资产类型
+    string moneyType = 4; // 货币类型
+    int32 status = 5; // 状态
+    int32 tradeMode = 6; // 交易模式
+    int32 settleMode = 7; // 清算模式
+    string remark = 8; // 备注
+    string realFundAccount = 9; // 实际资金账号ID
+    string realClientType = 10; // 实际客户账号类型, 比如 trade: UF2.0交易账号
+    string realClientId = 11; // 实际客户账号ID
+    string clientName = 12; // 客户姓名
+    string certType = 13; // 证件类型
+    string certId = 14; // 证件ID
+    int64 openAt = 15; // 开户时间
+    int64 createAt = 16; // 创建时间
+    int64 changeAt = 17; // 状态变更时间
+}
+
+// 资金账号列表的返回消息
+message ListFundAccountResp {
+    RespStatus respStatus = 1;// 结果状态
+    PageInfo pageInfo = 2; // 页信息
+    repeated FundAccount data = 3; // 资金账号列表
+}
+
+
+

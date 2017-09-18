@@ -1,0 +1,57 @@
+
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "common.proto";
+
+package grpcapi;
+option java_package = "com.gf.va.api.grpcapi"; 
+
+// 系统管理
+service SystemManager {
+    // 查询系统状态信息
+    rpc GetSystemInfo (QuerySystemReq) returns (SystemResp) {
+        option (google.api.http) = {
+            get: "/system/info"
+        };
+    }
+    // ping
+    rpc Ping (QueryPingReq) returns (PingResp) {
+        option (google.api.http) = {
+            get: "/ping"
+        };
+    }
+}
+
+//查询系统状态信息的消息
+message QuerySystemReq {
+    BaseReq baseReq = 1; // 基础请求头
+    int64 initDate = 2; //交易日期
+}
+
+//系统状态 对象
+message System {
+    int64 initDate = 1;  //交易日期
+    int32 status = 2;  //系统状态
+    int32 openFundBegin = 3;  //开基交易开始时间
+    int32 openFundEnd = 4;  //开基交易结束时间
+    string remark = 5; //描述说明
+    int64 updateAt = 6; //更新日期
+}
+
+// 查询系统状态信息的消息相应
+message SystemResp {
+    RespStatus respStatus = 1;  //结果状态
+    System data = 2;  //系统状态对象
+}
+
+//查询ping的消息
+message QueryPingReq {
+    BaseReq baseReq = 1; // 基础请求头
+}
+
+// 查询Ping消息相应
+message PingResp {
+    RespStatus respStatus = 1;  //结果状态
+    string data = 2;  //ping 返回
+}

@@ -1,0 +1,27 @@
+package: github.com/jackielihf/grpc-bench
+import:
+- package: github.com/golang/protobuf
+  subpackages:
+  - codes
+  - credentials
+  - grpclb/grpc_lb_v1
+  - grpclog
+  - internal
+  - keepalive
+  - metadata
+  - naming
+  - peer
+  - stats
+  - status
+  - tap
+  - transport
+- package: github.com/montanaflynn/stats
+  version: ^0.2.0
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: google.golang.org/genproto
+  subpackages:
+  - googleapis/api/annotations
+- package: google.golang.org/grpc
+  version: ^1.6.0
